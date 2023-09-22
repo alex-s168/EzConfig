@@ -1,3 +1,7 @@
+include("planes");
+include("parameters");
+include("categories");
+
 A_10_base = {
 
     parent = planes.PlaneBase;

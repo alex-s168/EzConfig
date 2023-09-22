@@ -1,6 +1,8 @@
+package me.alex_s168.ezcfg
+
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
-import exception.ConfigException
+import me.alex_s168.ezcfg.exception.ConfigException
 import kotlin.math.max
 import kotlin.math.min
 

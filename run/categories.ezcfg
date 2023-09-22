@@ -1,0 +1,9 @@
+aircraft = {
+    planes = {
+        Attack = {
+            name = "Attack";
+            description = "Attack planes are designed to attack ground targets.";
+        };
+    };
+};
+export("aircraft");

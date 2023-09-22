@@ -1,0 +1,11 @@
+Military = {
+    name = "Military";
+    description = "Non-civilian objects";
+};
+export("Military");
+
+var Civilian = {
+    name = "Civilian";
+    description = "Civilian objects";
+};
+export("Civilian");

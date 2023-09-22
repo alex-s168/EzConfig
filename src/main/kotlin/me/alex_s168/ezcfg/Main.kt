@@ -1,3 +1,7 @@
+package me.alex_s168.ezcfg
+
+import me.alex_s168.ktlib.any.println
+import me.alex_s168.ktlib.tree.MutableNode
 import me.alex_s168.ktlib.tree.MutableTree
 import java.io.File
 import kotlin.time.measureTime
@@ -18,24 +22,24 @@ internal object ManualClassLoader {
 fun main() {
     ManualClassLoader.load()
 
-    val inp = File("test.ezcfg").readText()
+    val inp = File("run/a10a.ezcfg").readText()
 
-    val root = RootTokenLocation("test.ezcfg")
+    val root = RootTokenLocation("run/a10a.ezcfg")
 
     val tokens = tokenize(inp, root, ErrorContext("tokenizing"))
+
+    val parserErrors = ErrorContext("parsing")
 
     val ast: MutableTree<ASTValue>
     val parseTime = measureTime {
         //println(tokens.joinToString(separator = "\n") { it.toString() })
 
-        val parserErrors = ErrorContext("parsing")
-
         ast = MutableTree(parseMain(tokens, parserErrors))
 
         ast.await()
-
-        parserErrors.done()
     }.inWholeMilliseconds
+
+    parserErrors.done()
 
     println("Parsing took $parseTime ms")
 

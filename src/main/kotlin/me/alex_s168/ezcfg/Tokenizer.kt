@@ -1,3 +1,5 @@
+package me.alex_s168.ezcfg
+
 data class RootTokenLocation(
     val file: String
 )

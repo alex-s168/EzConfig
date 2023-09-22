@@ -1,0 +1,7 @@
+PlaneBase = {};
+export("PlaneBase");
+native("PlaneBase");
+
+register = function;
+export("register");
+native("register");
