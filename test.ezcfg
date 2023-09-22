@@ -1,0 +1,29 @@
+A_10_base = {
+
+    parent = planes.PlaneBase;
+
+    name = "A-10A";
+    category = categories.aircraft.planes.Attack;
+    description = "A-10A Thunderbolt II";
+    parameters = [
+        parameters.Military
+    ];
+
+    rendering = {
+        model = "planes/a_10/a_10a/model.obj";
+        scale = 1.0;
+        # this is a comment
+        skins = [
+            ["skin_a", "planes/a_10/a_10a/tex/skin_a.png"]
+        ];
+    };
+
+    physics = {
+        aero_model = "planes/a_10/a_10a/aero.obj";
+        mass = 11000.0;
+        center_of_mass = [0.0, 0.0, 0.0];
+    };
+
+};
+
+planes.register ( A_10_base );
