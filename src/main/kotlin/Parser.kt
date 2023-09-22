@@ -1,6 +1,5 @@
 import me.alex_s168.ktlib.async.*
 import me.alex_s168.ktlib.tree.MutableNode
-import me.alex_s168.ktlib.tree.MutableTree
 
 open class ASTValue(
     val name: String,
@@ -71,7 +70,7 @@ fun parseExpression(
         return inp[i - 1]
     }
 
-    val none = Pair(0, MutableNode<ASTValue>(null, concurrentMutableCollectionOf(), null))
+    val none = Pair(0, MutableNode<ASTValue>(null, concurrentMutableListOf(), null))
 
     when (token.type) {
         TokenType.IDENTIFIER -> {
@@ -82,7 +81,7 @@ fun parseExpression(
                         token.value,
                         token.location
                     ),
-                    concurrentMutableCollectionOf(),
+                    concurrentMutableListOf(),
                     null
                 )
             )
@@ -95,7 +94,7 @@ fun parseExpression(
                         token.value,
                         token.location
                     ),
-                    concurrentMutableCollectionOf(),
+                    concurrentMutableListOf(),
                     null
                 )
             )
@@ -113,7 +112,7 @@ fun parseExpression(
                         num,
                         token.location
                     ),
-                    concurrentMutableCollectionOf(),
+                    concurrentMutableListOf(),
                     null
                 )
             )
@@ -188,7 +187,7 @@ fun parseExpression(
                             token.location.rootLocation
                         )
                     ),
-                    m.root.children,
+                    m.children,
                     null
                 )
             )
@@ -206,7 +205,7 @@ fun parseStatement(
 ): MutableNode<ASTValue> {
     val none = MutableNode<ASTValue>(
         null,
-        concurrentMutableCollectionOf(),
+        concurrentMutableListOf(),
         null
     )
 
@@ -246,7 +245,7 @@ fun parseStatement(
                     left.value,
                     left.location
                 ),
-                concurrentMutableCollectionOf(),
+                concurrentMutableListOf(),
                 null
             )
 
@@ -298,13 +297,13 @@ fun parseStatement(
                         left.location.rootLocation
                     )
                 ),
-                concurrentMutableCollectionOf(
+                concurrentMutableListOf(
                     MutableNode(
                         ASTVariableReference(
                             left.value,
                             left.location
                         ),
-                        concurrentMutableCollectionOf(),
+                        concurrentMutableListOf(),
                         null
                     ),
                     right
@@ -322,7 +321,7 @@ fun parseStatement(
 fun parseMain(
     inp: List<Token>,
     errorContext: ErrorContext
-): MutableTree<ASTValue> {
+): MutableNode<ASTValue> {
     var i = 0
     var token: Token
 
@@ -372,13 +371,10 @@ fun parseMain(
         consume()
     }
 
-    tasks.await()
-
-    return MutableTree(
-        MutableNode(
-            value = null,
-            children = statements,
-            parent = null
-        )
+    return MutableNode(
+        value = null,
+        children = statements,
+        parent = null,
+        childrenFuture = tasks.createFuture { 0 }
     )
 }
