@@ -126,14 +126,13 @@ fun parseExpression(
             // uses parseMain as it is a block of statements
             val tokens = mutableListOf<Token>()
             var ind = 0
-            while (token.type != TokenType.CURLY_BRACE_CLOSE || ind == 0) {
+            while (token.type != TokenType.CURLY_BRACE_CLOSE || ind >= 0) {
                 consume() ?: return none
                 if (token.type == TokenType.CURLY_BRACE_OPEN) ind++
                 else if (token.type == TokenType.CURLY_BRACE_CLOSE) ind--
                 tokens += token
             }
             val m = parseMain(tokens.dropLast(1), errorContext)
-            consume()
             return Pair(
                 i + 1,
                 MutableNode(
