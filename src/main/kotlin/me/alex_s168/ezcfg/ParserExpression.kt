@@ -15,6 +15,12 @@ fun parseExpression(
     // - array (using square brackets)
     // - block (using curly braces)
 
+    val none = Pair(0, MutableNode<ASTValue>(null, concurrentMutableListOf(), null))
+
+    if (inp.isEmpty()) {
+        return none
+    }
+
     var i = 0
     var token: Token = inp[i]
 
@@ -24,8 +30,6 @@ fun parseExpression(
         token = inp[i]
         return inp[i - 1]
     }
-
-    val none = Pair(0, MutableNode<ASTValue>(null, concurrentMutableListOf(), null))
 
     when (token.type) {
         TokenType.IDENTIFIER -> {
