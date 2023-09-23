@@ -88,7 +88,7 @@ fun parseStatement(
             val (used, right) = parseExpression(inp.subList(i, inp.size), errorContext)
             i += used
             if (i < inp.size) {
-                errorContext.addError(inp[i].location, "Unexpected token!")
+                errorContext.addError(inp[i].location, "Unexpected token! [C]")
             }
 
             return MutableNode(

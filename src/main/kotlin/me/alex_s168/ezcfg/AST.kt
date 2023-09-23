@@ -1,5 +1,8 @@
 package me.alex_s168.ezcfg
 
+import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
+import java.nio.file.Path
+
 open class ASTValue(
     val name: String,
     val loc: TokenLocation
@@ -9,6 +12,26 @@ open class ASTValue(
 
     override fun toString(): String =
         name
+}
+
+class ASTRoot(
+    loc: TokenLocation
+): ASTValue("root", loc) {
+    val imports = concurrentMutableCollectionOf<Path>()
+
+    // constant paths
+    val paths = concurrentMutableCollectionOf<Path>()
+}
+
+class ASTFile(
+    loc: TokenLocation,
+    val path: Path
+): ASTValue("file", loc) {
+
+    val variables = concurrentMutableCollectionOf<Variable>()
+
+    override fun toString(): String =
+        "$name: $path"
 }
 
 class ASTFunctionCall(

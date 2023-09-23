@@ -4,7 +4,7 @@ Military = {
 };
 export("Military");
 
-var Civilian = {
+Civilian = {
     name = "Civilian";
     description = "Civilian objects";
 };

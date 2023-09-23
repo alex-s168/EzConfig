@@ -3,6 +3,7 @@ package me.alex_s168.ezcfg
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
 import me.alex_s168.ezcfg.exception.ConfigException
+import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import kotlin.math.max
 import kotlin.math.min
 
@@ -14,7 +15,7 @@ data class Error(
 
 data class ErrorContext(
     val name: String,
-    val errors: MutableList<Error> = mutableListOf()
+    val errors: MutableCollection<Error> = concurrentMutableCollectionOf()
 )
 
 fun ErrorContext.addError(loc: TokenLocation, msg: String?) {
@@ -73,9 +74,9 @@ private fun printLoc(loc: TokenLocation, color: TextColors, msg: String?) {
     print(left)
     val line = loc.code.split("\n")[loc.line - 1]
 
-    val pre = line.substring(0, loc.column - 1)
-    val mid = TextStyles.bold(line.substring(loc.column - 1, min(line.length, loc.column + loc.length - 1)))
-    val post = line.substring(min(line.length, loc.column + loc.length - 1))
+    val pre = line.substring(0, loc.column - loc.length)
+    val mid = TextStyles.bold(line.substring(loc.column - loc.length, min(line.length, loc.column + loc.length- loc.length)))
+    val post = line.substring(min(line.length, loc.column + loc.length - loc.length))
 
     print(pre)
     print(mid)

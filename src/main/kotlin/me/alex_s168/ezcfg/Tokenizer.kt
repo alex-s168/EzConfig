@@ -281,7 +281,6 @@ fun tokenize(
             }
         }
     }
-    errorContext.done()
     return tokens
 }
 
