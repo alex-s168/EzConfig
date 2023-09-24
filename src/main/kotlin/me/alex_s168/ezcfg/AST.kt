@@ -1,7 +1,6 @@
 package me.alex_s168.ezcfg
 
 import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
-import me.alex_s168.ktlib.tree.Node
 import java.nio.file.Path
 
 open class ASTValue(
