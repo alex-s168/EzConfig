@@ -4,6 +4,7 @@ data class RootTokenLocation(
     val file: String
 )
 
+// TODO: refactor: move val code into RootTokenLocation
 data class TokenLocation(
     val line: Int,
     val column: Int,
@@ -24,18 +25,18 @@ data class Token(
 }
 
 enum class TokenType {
-    IDENTIFIER,
-    EQUALS,
-    SEMICOLON,
-    STRING,
-    NUMBER,
-    CURLY_BRACE_OPEN,
-    CURLY_BRACE_CLOSE,
-    SQUARE_BRACE_OPEN,
-    SQUARE_BRACE_CLOSE,
-    COMMA,
-    PARENTHESES_OPEN,
-    PARENTHESES_CLOSE,
+    IDENTIFIER,         // (start with letter, can contain letters, numbers, underscores, and dots)
+    EQUALS,             // = (assignment)
+    SEMICOLON,          // ; (statement terminator)
+    STRING,             // "string" (double-quoted string literal)
+    NUMBER,             // 123.456 (number literal (double))
+    CURLY_BRACE_OPEN,   // { (starts a block of statements)
+    CURLY_BRACE_CLOSE,  // } (ends a block of statements)
+    SQUARE_BRACE_OPEN,  // [ (starts an array literal)
+    SQUARE_BRACE_CLOSE, // ] (ends an array literal)
+    COMMA,              // , (separates elements in an array literal)
+    PARENTHESES_OPEN,   // ( (starts the arguments of a function call)
+    PARENTHESES_CLOSE,  // ) (ends the arguments of a function call)
 }
 
 fun tokenize(

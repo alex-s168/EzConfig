@@ -24,6 +24,7 @@ fun parseMain(
 
     while (i < inp.size) {
         token = inp[i]
+        val whereTokens = i
         if (token.type != TokenType.IDENTIFIER) {
             errorContext.addError(token.location, "Unexpected token! [A]")
         }

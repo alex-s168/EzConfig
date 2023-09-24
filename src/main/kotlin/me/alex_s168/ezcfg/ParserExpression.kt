@@ -4,8 +4,16 @@ import me.alex_s168.ktlib.async.concurrentMutableListOf
 import me.alex_s168.ktlib.async.forEachAsync
 import me.alex_s168.ktlib.tree.MutableNode
 
-fun parseExpression(
+/**
+ * Parses an expression.
+ * @param inp The list of tokens to parse.
+ * @param off The offset to start parsing at.
+ * @param errorContext The error context to add errors to.
+ * @return The number of tokens used and the expression and the ast node.
+ */
+internal fun parseExpression(
     inp: List<Token>,
+    off: Int,
     errorContext: ErrorContext
 ): Pair<Int, MutableNode<ASTValue>> {
     // returns the number of tokens used and the expression and the ast node
@@ -17,11 +25,12 @@ fun parseExpression(
 
     val none = Pair(0, MutableNode<ASTValue>(null, concurrentMutableListOf(), null))
 
-    if (inp.isEmpty()) {
+    var i = off
+
+    if (i >= inp.size) {
         return none
     }
 
-    var i = 0
     var token: Token = inp[i]
 
     fun consume(): Token? {
@@ -34,7 +43,7 @@ fun parseExpression(
     when (token.type) {
         TokenType.IDENTIFIER -> {
             return Pair(
-                i + 1,
+                1,
                 MutableNode(
                     ASTVariableReference(
                         token.value,
@@ -47,7 +56,7 @@ fun parseExpression(
         }
         TokenType.STRING -> {
             return Pair(
-                i + 1,
+                1,
                 MutableNode(
                     ASTString(
                         token.value,
@@ -65,7 +74,7 @@ fun parseExpression(
                 return none
             }
             return Pair(
-                i + 1,
+                1,
                 MutableNode(
                     ASTNumber(
                         num,
@@ -77,6 +86,7 @@ fun parseExpression(
             )
         }
         TokenType.SQUARE_BRACE_OPEN -> {
+            // TODO: speed up by passing list indecis to parseExpression instead of creating a new list
             val children = concurrentMutableListOf<MutableNode<ASTValue>>()
             consume() ?: return none
 
@@ -97,7 +107,7 @@ fun parseExpression(
             tokens += tk
 
             tokens.forEachAsync { tks ->
-                val (used, expr) = parseExpression(tks, errorContext)
+                val (used, expr) = parseExpression(tks, 0, errorContext)
                 if (used != tks.size) {
                     errorContext.addError(tks[used].location, "Unexpected token!")
                 }
@@ -114,7 +124,7 @@ fun parseExpression(
                 )
             )
             return Pair(
-                i + 1,
+                i + 1 - off,
                 MutableNode(
                     v,
                     children,
@@ -134,7 +144,7 @@ fun parseExpression(
             }
             val m = parseMain(tokens.dropLast(1), errorContext)
             return Pair(
-                i + 1,
+                i + 1 - off,
                 MutableNode(
                     ASTBlock(
                         TokenLocation(

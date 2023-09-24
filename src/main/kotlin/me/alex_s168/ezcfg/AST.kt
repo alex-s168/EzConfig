@@ -4,14 +4,14 @@ import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import java.nio.file.Path
 
 open class ASTValue(
-    val name: String,
+    val nodeTypeName: String,
     val loc: TokenLocation
 ) {
 
     var type: Type? = null
 
     override fun toString(): String =
-        name
+        nodeTypeName
 }
 
 class ASTRoot(
@@ -32,7 +32,7 @@ class ASTFile(
     val importedNamespaces = concurrentMutableCollectionOf<Pair<String, Path>>()
 
     override fun toString(): String =
-        "$name: $path"
+        "$nodeTypeName: $path"
 }
 
 class ASTFunctionCall(
@@ -44,7 +44,7 @@ class ASTVariableReference(
     loc: TokenLocation
 ): ASTValue("ref", loc) {
     override fun toString(): String =
-        "$name: $variable"
+        "$nodeTypeName: $variable"
 }
 
 class ASTString(
@@ -52,7 +52,7 @@ class ASTString(
     loc: TokenLocation
 ): ASTValue("string", loc) {
     override fun toString(): String =
-        "$name: $string"
+        "$nodeTypeName: $string"
 }
 
 class ASTNumber(
@@ -60,7 +60,7 @@ class ASTNumber(
     loc: TokenLocation
 ): ASTValue("number", loc) {
     override fun toString(): String =
-        "$name: $number"
+        "$nodeTypeName: $number"
 }
 
 class ASTArray(
