@@ -8,6 +8,7 @@ import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
+import kotlin.io.path.pathString
 
 fun getPath(pIn: String, fromIn: Path, root: ASTRoot): Path? {
     val p = pIn.substring(1, pIn.length - 1)
@@ -114,7 +115,10 @@ private fun generateASTFor(
     val importTasks = concurrentMutableCollectionOf<AsyncTask>()
 
     fileNode.children.forEachAsyncConf { statement ->
-        if (statement.value is ASTFunctionCall) {
+        if (statement.value is ASTAssignment) {
+            TODO()
+        }
+        else if (statement.value is ASTFunctionCall) {
             val func = statement.children.first()
             val name = (func.value!! as? ASTVariableReference)?.variable
                 ?: throw ConfigException("Unexpected error occurred! [gAST:rCtF:1]")
@@ -173,10 +177,25 @@ private fun generateASTFor(
                     return@forEachAsyncConf
                 }
 
+                // namespace
+                val pns = p
+                    .fileName
+                    .pathString
+                    .substringBeforeLast(".ezcfg")
+
+                astFile.importedNamespaces += pns to p
+
                 root.imports.add(p)
 
                 importTasks += async {
-                    importTasks.addAll(generateASTFor(f.readText(), p, tree, tokenizingErrors, parserErrors, processingErrors))
+                    importTasks += generateASTFor(
+                        f.readText(),
+                        p,
+                        tree,
+                        tokenizingErrors,
+                        parserErrors,
+                        processingErrors
+                    )
                 }
 
                 return@forEachAsyncConf

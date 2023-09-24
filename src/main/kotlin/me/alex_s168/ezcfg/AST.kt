@@ -1,6 +1,7 @@
 package me.alex_s168.ezcfg
 
 import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
+import me.alex_s168.ktlib.tree.Node
 import java.nio.file.Path
 
 open class ASTValue(
@@ -8,7 +9,7 @@ open class ASTValue(
     val loc: TokenLocation
 ) {
 
-    val type: Type? = null
+    var type: Type? = null
 
     override fun toString(): String =
         name
@@ -29,6 +30,7 @@ class ASTFile(
 ): ASTValue("file", loc) {
 
     val variables = concurrentMutableCollectionOf<Variable>()
+    val importedNamespaces = concurrentMutableCollectionOf<Pair<String, Path>>()
 
     override fun toString(): String =
         "$name: $path"

@@ -10,3 +10,8 @@ class Variable(
     var exported: Boolean = false
     var native: Boolean = false
 }
+
+fun Node<ASTFile>.findVariable(name: String): Variable? {
+    // account for stuff like "x.y.z" and namespaces and object members.
+    TODO()
+}
