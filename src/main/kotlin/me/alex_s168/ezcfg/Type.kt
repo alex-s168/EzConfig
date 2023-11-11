@@ -3,6 +3,7 @@ package me.alex_s168.ezcfg
 import me.alex_s168.ezcfg.exception.ConfigException
 import me.alex_s168.ktlib.async.forEachAsyncConf
 import me.alex_s168.ktlib.tree.MutableNode
+import me.alex_s168.ktlib.tree.Node
 import me.alex_s168.ktlib.tree.traverser.AsyncTreeTraverser
 
 enum class TypeBase {
@@ -11,6 +12,8 @@ enum class TypeBase {
     ARRAY,
     FUNCTION,
     BLOCK,
+
+    FILE_MAIN
 }
 
 // the idea is that every element in an array can be of a different type
@@ -21,8 +24,14 @@ data class Type(
 fun Type.isCompatibleWith(other: Type): Boolean =
     this.type == other.type
 
-fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext) {
+@Suppress("UNCHECKED_CAST")
+fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: Node<ASTValue>) {
     AsyncTreeTraverser.from(this) { node, traverser ->
+        if (node.value is ASTVariableHolding) {
+            (node.value!! as ASTVariableHolding).variables.forEachAsyncConf { variable ->
+                traverser.process(variable.value)
+            }
+        }
         when (node.value) {
             is ASTString -> {
                 node.value!!.type = Type(TypeBase.STRING)
@@ -49,8 +58,6 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext) {
             }
             is ASTVariableReference -> {
                 val vn = (node.value!! as ASTVariableReference).variable
-                val fileNode = node.topFile()
-                    ?: throw ConfigException("Unexpected error occurred! [gAST:cT:1]")
 
                 // when you do "register = function;" it declares variable register as function
                 if (vn == "function") {
@@ -58,7 +65,7 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext) {
                     return@from false
                 }
 
-                val variable = fileNode.findVariable(vn)
+                val variable = node.resolve(vn, fileNode as Node<ASTFile>, errorContext)
                 if (variable == null) {
                     errorContext.addError(
                         loc = node.value!!.loc,
@@ -68,6 +75,10 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext) {
                 }
 
                 node.value!!.type = variable.type
+            }
+            is ASTAssignment -> {
+                traverser.process(node.children.last())
+                return@from false
             }
             else -> {
                 return@from false

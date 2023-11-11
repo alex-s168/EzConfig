@@ -4,7 +4,7 @@ import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import java.nio.file.Path
 
 open class ASTValue(
-    val nodeTypeName: String,
+    var nodeTypeName: String,
     val loc: TokenLocation
 ) {
 
@@ -23,16 +23,41 @@ class ASTRoot(
     val paths = concurrentMutableCollectionOf<Path>()
 }
 
+abstract class ASTVariableHolding(
+    name: String,
+    loc: TokenLocation
+): ASTValue(name, loc) {
+    val variables = concurrentMutableCollectionOf<Variable>()
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+        sb.append("$nodeTypeName:\n")
+        for (variable in variables) {
+            sb.append(" - $variable\n")
+        }
+        return sb.toString()
+    }
+}
+
 class ASTFile(
     loc: TokenLocation,
     val path: Path
-): ASTValue("file", loc) {
-
-    val variables = concurrentMutableCollectionOf<Variable>()
+): ASTVariableHolding("file", loc) {
     val importedNamespaces = concurrentMutableCollectionOf<Pair<String, Path>>()
 
-    override fun toString(): String =
-        "$nodeTypeName: $path"
+    override fun toString(): String {
+        val sb = StringBuilder()
+        sb.append("$nodeTypeName: $path\n")
+        sb.append(" variables:\n")
+        for (variable in variables) {
+            sb.append(" - $variable\n")
+        }
+        sb.append(" imported namespaces:\n")
+        for (importedNamespace in importedNamespaces) {
+            sb.append(" - $importedNamespace\n")
+        }
+        return sb.toString()
+    }
 }
 
 class ASTFunctionCall(
@@ -52,7 +77,7 @@ class ASTString(
     loc: TokenLocation
 ): ASTValue("string", loc) {
     override fun toString(): String =
-        "$nodeTypeName: $string"
+        "$nodeTypeName: \"$string\""
 }
 
 class ASTNumber(
@@ -69,7 +94,7 @@ class ASTArray(
 
 class ASTBlock(
     loc: TokenLocation
-): ASTValue("block", loc)
+): ASTVariableHolding("block", loc)
 
 class ASTAssignment(
     loc: TokenLocation

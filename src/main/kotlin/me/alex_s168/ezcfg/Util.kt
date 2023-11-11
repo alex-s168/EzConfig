@@ -15,8 +15,8 @@ fun <T> Node<T>.top(): Node<T> {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun Node<ASTValue>.topFile(): Node<ASTFile>? {
-    var ret: Node<ASTValue>? = this
+fun <T: ASTValue> Node<T>.topFile(): Node<ASTFile>? {
+    var ret: Node<ASTValue>? = this as Node<ASTValue>
     while (ret != null) {
         if (ret.value is ASTFile) {
             return ret as Node<ASTFile>
@@ -26,8 +26,7 @@ fun Node<ASTValue>.topFile(): Node<ASTFile>? {
     return null
 }
 
-internal fun getPath(pIn: String, fromIn: Path, root: ASTRoot): Path? {
-    val p = pIn.substring(1, pIn.length - 1)
+internal fun getPath(p: String, fromIn: Path, root: ASTRoot): Path? {
     val from = fromIn.absolute()
     return try {
         from.resolve("$p.ezcfg")
@@ -39,4 +38,19 @@ internal fun getPath(pIn: String, fromIn: Path, root: ASTRoot): Path? {
         }
         null
     }
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T: ASTValue> Node<T>.getParentBlock(): Node<ASTVariableHolding>? {
+    if (this.value is ASTVariableHolding) {
+        return this as Node<ASTVariableHolding>
+    }
+    var ret: Node<ASTValue>? = this as Node<ASTValue>
+    while (ret != null) {
+        if (ret.value is ASTVariableHolding) {
+            return ret as Node<ASTVariableHolding>
+        }
+        ret = ret.parent
+    }
+    return null
 }

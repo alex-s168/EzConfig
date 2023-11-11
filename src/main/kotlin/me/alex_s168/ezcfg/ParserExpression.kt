@@ -59,7 +59,7 @@ internal fun parseExpression(
                 1,
                 MutableNode(
                     ASTString(
-                        token.value,
+                        token.value.substring(1, token.value.length - 1),
                         token.location
                     ),
                     concurrentMutableListOf(),

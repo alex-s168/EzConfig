@@ -7,9 +7,12 @@ import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import me.alex_s168.ktlib.async.forEachAsyncConf
 import me.alex_s168.ktlib.tree.MutableNode
 import me.alex_s168.ktlib.tree.MutableTree
+import me.alex_s168.ktlib.tree.Node
+import me.alex_s168.ktlib.tree.traverser.AsyncTreeTraverser
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
+@Suppress("UNCHECKED_CAST")
 internal fun generateASTFor(
     input: String,
     path: Path,
@@ -24,8 +27,6 @@ internal fun generateASTFor(
 
     val parsedNode =
         parseMain(tokens, parserErrors)
-
-    parsedNode.await()
 
     val astFile = ASTFile(
         path = path.toAbsolutePath(),
@@ -44,6 +45,86 @@ internal fun generateASTFor(
         parent = tree.root
     )
 
+    parsedNode.await()
+
+    val allVariables = concurrentMutableCollectionOf<Iterable<Variable>>(astFile.variables)
+
+    fileNode.children.forEach {
+        if (it.value is ASTAssignment) {
+            val name = (it.children.first().value as? ASTVariableReference
+                ?: throw ConfigException("Unexpected error occurred! [gAST:rCtF:3]"))
+                .variable
+
+            if (astFile.variables.any { v -> v.name == name }) {
+                processingErrors.addWarn(
+                    it.value!!.loc,
+                    "Variable already defined!"
+                )
+            }
+
+            val variable = Variable(
+                name,
+                it.value!!.type,
+                it.children.last(),
+            )
+
+            astFile.variables += variable
+        }
+    }
+    
+    AsyncTreeTraverser.from(fileNode) { node, _ ->
+        node as? MutableNode<ASTValue>
+            ?: throw ConfigException("Unexpected error occurred! [gAST:rCtF:1]")
+
+        if (node.value is ASTBlock) {
+            val b = (node.value!! as ASTBlock)
+            allVariables += b.variables
+            node.children.forEach { child ->
+                val ass = child.value as? ASTAssignment
+                    ?: return@forEach
+
+                val name = (child.children.first().value as? ASTVariableReference
+                    ?: throw ConfigException("Unexpected error occurred! [gAST:rCtF:3:x]"))
+                    .variable
+
+                if (b.variables.any { it.name == name }) {
+                    processingErrors.addWarn(
+                        child.value!!.loc,
+                        "Variable already defined!"
+                    )
+                }
+
+                val variable = Variable(
+                    name,
+                    ass.type,
+                    child.children.last(),
+                )
+
+                b.variables += variable
+            }
+        }
+
+        true
+    }.traverse()
+
+    // update parents because calculateTypes needs the parents
+    AsyncTreeTraverser.from(fileNode) { node, _ ->
+        node as MutableNode
+        node.children.forEach {
+            it.parent = node
+        }
+        return@from true
+    }.traverse()
+
+    fileNode.calculateTypes(processingErrors, fileNode)
+
+    // now we can update all the types of all the variables
+    allVariables.forEach {
+        it.forEach {  v ->
+            v.type = v.value.value?.type
+        }
+    }
+
     tree += fileNode
 
     val root = tree.root.value!! as ASTRoot
@@ -53,10 +134,7 @@ internal fun generateASTFor(
     val importTasks = concurrentMutableCollectionOf<AsyncTask>()
 
     fileNode.children.forEachAsyncConf { statement ->
-        if (statement.value is ASTAssignment) {
-            TODO()
-        }
-        else if (statement.value is ASTFunctionCall) {
+        if (statement.value is ASTFunctionCall) {
             val func = statement.children.first()
             val name = (func.value!! as? ASTVariableReference)?.variable
                 ?: throw ConfigException("Unexpected error occurred! [gAST:rCtF:1]")
@@ -141,7 +219,7 @@ internal fun generateASTFor(
 
             val vn = argv.string
 
-            val v = astFile.variables.find { it.name == vn }
+            val v = arg.resolve(vn, fileNode as Node<ASTFile>, processingErrors)
             if (v == null) {
                 processingErrors.addError(
                     argv.loc,
