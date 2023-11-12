@@ -1,5 +1,8 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.ast
 
+import me.alex_s168.ezcfg.tokens.TokenLocation
+import me.alex_s168.ezcfg.check.Type
+import me.alex_s168.ezcfg.check.Variable
 import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import java.nio.file.Path
 

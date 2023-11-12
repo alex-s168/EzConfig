@@ -1,5 +1,7 @@
 package me.alex_s168.ezcfg
 
+import me.alex_s168.ezcfg.ast.ASTValue
+import me.alex_s168.ezcfg.check.generateAST
 import me.alex_s168.ktlib.tree.MutableTree
 import kotlin.io.path.Path
 import kotlin.time.measureTime
@@ -30,6 +32,8 @@ fun main() {
     }.inWholeMilliseconds
 
     println("Generating and fixing the ast took: $time ms")
+
+    Dummy::class.annotations
 
     println(ast)
 }

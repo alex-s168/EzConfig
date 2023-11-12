@@ -1,12 +1,18 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.check
 
+import me.alex_s168.ezcfg.*
+import me.alex_s168.ezcfg.ast.*
 import me.alex_s168.ezcfg.exception.ConfigException
+import me.alex_s168.ezcfg.getPath
+import me.alex_s168.ezcfg.parse.parseMain
+import me.alex_s168.ezcfg.tokens.RootTokenLocation
+import me.alex_s168.ezcfg.tokens.TokenLocation
+import me.alex_s168.ezcfg.tokens.tokenize
 import me.alex_s168.ktlib.async.*
 import me.alex_s168.ktlib.tree.MutableNode
 import me.alex_s168.ktlib.tree.MutableTree
 import me.alex_s168.ktlib.tree.Node
 import me.alex_s168.ktlib.tree.traverser.AsyncTreeTraverser
-import me.alex_s168.ktlib.tree.traverser.SimpleTreeTraverser
 import java.nio.file.Path
 import kotlin.io.path.pathString
 

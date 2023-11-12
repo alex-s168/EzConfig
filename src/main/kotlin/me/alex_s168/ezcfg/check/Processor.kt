@@ -1,5 +1,11 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.check
 
+import me.alex_s168.ezcfg.ErrorContext
+import me.alex_s168.ezcfg.tokens.RootTokenLocation
+import me.alex_s168.ezcfg.tokens.TokenLocation
+import me.alex_s168.ezcfg.ast.ASTRoot
+import me.alex_s168.ezcfg.ast.ASTValue
+import me.alex_s168.ezcfg.done
 import me.alex_s168.ezcfg.exception.ConfigException
 import me.alex_s168.ktlib.async.*
 import me.alex_s168.ktlib.tree.MutableNode

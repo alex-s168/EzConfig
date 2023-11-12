@@ -1,5 +1,9 @@
 package me.alex_s168.ezcfg
 
+import me.alex_s168.ezcfg.ast.ASTFile
+import me.alex_s168.ezcfg.ast.ASTRoot
+import me.alex_s168.ezcfg.ast.ASTValue
+import me.alex_s168.ezcfg.ast.ASTVariableHolding
 import me.alex_s168.ktlib.tree.Node
 import java.nio.file.InvalidPathException
 import java.nio.file.Path

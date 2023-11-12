@@ -1,6 +1,11 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.check
 
+import me.alex_s168.ezcfg.ErrorContext
+import me.alex_s168.ezcfg.addError
+import me.alex_s168.ezcfg.ast.ASTFile
+import me.alex_s168.ezcfg.ast.ASTValue
 import me.alex_s168.ezcfg.exception.ConfigException
+import me.alex_s168.ezcfg.getParentBlock
 import me.alex_s168.ktlib.tree.Node
 
 class Variable(

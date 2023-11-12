@@ -1,4 +1,7 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.tokens
+
+import me.alex_s168.ezcfg.ErrorContext
+import me.alex_s168.ezcfg.addError
 
 data class RootTokenLocation(
     val file: String

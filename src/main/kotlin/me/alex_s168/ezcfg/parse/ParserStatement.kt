@@ -1,5 +1,13 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.parse
 
+import me.alex_s168.ezcfg.*
+import me.alex_s168.ezcfg.ast.ASTAssignment
+import me.alex_s168.ezcfg.ast.ASTFunctionCall
+import me.alex_s168.ezcfg.ast.ASTValue
+import me.alex_s168.ezcfg.ast.ASTVariableReference
+import me.alex_s168.ezcfg.tokens.Token
+import me.alex_s168.ezcfg.tokens.TokenLocation
+import me.alex_s168.ezcfg.tokens.TokenType
 import me.alex_s168.ktlib.async.AsyncTask
 import me.alex_s168.ktlib.async.concurrentMutableListOf
 import me.alex_s168.ktlib.tree.MutableNode
