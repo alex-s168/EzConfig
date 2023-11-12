@@ -5,9 +5,7 @@ import me.alex_s168.ezcfg.ast.*
 import me.alex_s168.ezcfg.tokens.Token
 import me.alex_s168.ezcfg.tokens.TokenLocation
 import me.alex_s168.ezcfg.tokens.TokenType
-import me.alex_s168.ktlib.async.AsyncTask
-import me.alex_s168.ktlib.async.concurrentMutableListOf
-import me.alex_s168.ktlib.async.forEachAsync
+import me.alex_s168.ktlib.async.*
 import me.alex_s168.ktlib.tree.MutableNode
 
 /**
@@ -93,8 +91,7 @@ internal fun parseExpression(
             )
         }
         TokenType.SQUARE_BRACE_OPEN -> {
-            // TODO: speed up by passing list indecis to parseExpression instead of creating a new list
-            val children = concurrentMutableListOf<MutableNode<ASTValue>>()
+            val children = mutableListOf<MutableNode<ASTValue>>()
             consume() ?: return none
 
             val tokens = mutableListOf<MutableList<Token>>()
@@ -113,8 +110,11 @@ internal fun parseExpression(
             }
             tokens += tk
 
-            tokens.forEachAsync { tks ->
-                val (used, expr) = parseExpression(tks, 0, errorContext, tasks)
+            val xtsk = concurrentMutableCollectionOf<AsyncTask>()
+            tokens.forEach { tks ->
+                xtsk.clear()
+                val (used, expr) = parseExpression(tks, 0, errorContext, xtsk)
+                xtsk.await()
                 if (used != tks.size) {
                     errorContext.addError(tks[used].location, "Unexpected token!")
                 }
@@ -128,7 +128,8 @@ internal fun parseExpression(
                     token.location.column - token.location.column,
                     token.location.code,
                     token.location.rootLocation
-                )
+                ),
+                children.toMutableList()
             )
             return Pair(
                 i + 1 - off,

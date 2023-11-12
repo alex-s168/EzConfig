@@ -42,9 +42,9 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: N
                 node.value!!.type = Type(TypeBase.NUMBER)
             }
             is ASTArray -> {
-                // manually first process the children
-                node.children.forEachAsyncConf { child ->
-                    traverser.process(child)
+                // manually first process the children synchronously
+                node.children.forEach {
+                    traverser.process(it)
                 }
                 node.value!!.type = Type(
                     TypeBase.ARRAY

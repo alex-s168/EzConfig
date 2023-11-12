@@ -123,7 +123,7 @@ internal fun generateASTFor(
 
     // now we can update all the types of all the variables
     allVariables.forEach {
-        it.forEach {  v ->
+        it.forEach { v ->
             v.type = v.value.value?.type
         }
     }

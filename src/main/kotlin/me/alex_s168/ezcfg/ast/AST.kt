@@ -4,6 +4,8 @@ import me.alex_s168.ezcfg.tokens.TokenLocation
 import me.alex_s168.ezcfg.check.Type
 import me.alex_s168.ezcfg.check.Variable
 import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
+import me.alex_s168.ktlib.tree.MutableNode
+import me.alex_s168.ktlib.tree.Node
 import java.nio.file.Path
 
 open class ASTValue(
@@ -92,7 +94,9 @@ class ASTNumber(
 }
 
 class ASTArray(
-    loc: TokenLocation
+    loc: TokenLocation,
+    val content: MutableList<MutableNode
+    <ASTValue>>
 ): ASTValue("array", loc)
 
 class ASTBlock(
