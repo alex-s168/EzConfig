@@ -1,0 +1,7 @@
+register = function;
+export("register");
+native("register");
+
+register({
+  name = "a";
+});

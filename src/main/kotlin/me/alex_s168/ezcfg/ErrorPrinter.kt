@@ -19,6 +19,10 @@ data class ErrorContext(
     val errors: MutableCollection<Error> = concurrentMutableCollectionOf()
 )
 
+fun ErrorContext.clear() {
+    errors.clear()
+}
+
 fun ErrorContext.addError(loc: TokenLocation, msg: String?) {
     errors += Error(loc, msg, false)
 }
@@ -75,8 +79,8 @@ private fun printLoc(loc: TokenLocation, color: TextColors, msg: String?) {
     print(left)
     val line = loc.code.split("\n")[loc.line - 1]
 
-    val pre = line.substring(0, loc.column - loc.length)
-    val mid = TextStyles.bold(line.substring(loc.column - loc.length, min(line.length, loc.column + loc.length- loc.length)))
+    val pre = line.substring(0, max(0, loc.column - loc.length))
+    val mid = TextStyles.bold(line.substring(max(0, loc.column - loc.length), min(line.length, loc.column + loc.length - loc.length)))
     val post = line.substring(min(line.length, loc.column + loc.length - loc.length))
 
     print(pre)

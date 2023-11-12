@@ -35,6 +35,9 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: N
             }
         }
         when (node.value) {
+            is ASTFile -> {
+                return@from true
+            }
             is ASTString -> {
                 node.value!!.type = Type(TypeBase.STRING)
             }
@@ -53,6 +56,19 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: N
                 return@from false
             }
             is ASTFunctionCall -> {
+                val fn = (node.children.first().value as ASTVariableReference).variable
+
+                if (fn !in listOf("function", "native", "export")) {
+                    val v = node.resolve(fn, fileNode as Node<ASTFile>, errorContext)
+                    if (v == null) {
+                        errorContext.addError(
+                            loc = node.value!!.loc,
+                            msg = "Function (/Variable) $fn is not defined!"
+                        )
+                        return@from false
+                    }
+                }
+
                 return@from false
             }
             is ASTBlock -> {

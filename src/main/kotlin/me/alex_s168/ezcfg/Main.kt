@@ -1,17 +1,19 @@
 package me.alex_s168.ezcfg
 
-import me.alex_s168.ezcfg.ast.ASTBlock
 import me.alex_s168.ezcfg.ast.ASTValue
 import me.alex_s168.ezcfg.check.generateAST
+import me.alex_s168.ezcfg.i.FileSource
+import me.alex_s168.ezcfg.i.apply
+import me.alex_s168.ezcfg.i.execute
 import me.alex_s168.ktlib.tree.MutableTree
-import me.alex_s168.ktlib.tree.Node
 import kotlin.io.path.Path
-import kotlin.time.measureTime
 
+/*
 class Test2 {
     var f: Float = 0.0f
+    lateinit var m: String
 
-    override fun toString(): String = "Test2(f=$f)"
+    override fun toString(): String = "Test2(f=$f, m=\"$m\")"
 }
 
 class Test {
@@ -22,17 +24,35 @@ class Test {
 
     override fun toString(): String = "Test(c=$c, d=$d, y=${y.contentToString()}, l=$l)"
 }
+ */
+
+class RegistryElement {
+    var name: String = ""
+
+    override fun toString(): String = "RegistryElement(name=\"$name\")"
+}
 
 fun main() {
-    val path = Path("run/test.ezcfg")
+    execute(
+        listOf(
+            FileSource("run/test2.ezcfg")
+        ),
+        mapOf(
+            "register" to { arg ->
+                val r = arg!!.apply(RegistryElement())
+                println("registered: $r")
+            }
+        )
+    )
 
-    val inp = path.toFile().readText()
+    // val path = Path("run/test2.ezcfg")
+//
+    // val inp = path.toFile().readText()
+//
+    // val ast: MutableTree<ASTValue> = generateAST(inp, path)
+//
+    // println(ast)
 
-    val ast: MutableTree<ASTValue>
-    val time = measureTime {
-        ast = generateAST(inp, path)
-    }.inWholeMilliseconds
-
-    val x = ast.root.children.first().children.first().children.last() as Node<ASTBlock>
-    println(x.apply(Test()))
+    // val x = ast.root.children.first().children.first().children.last() as Node<ASTBlock>
+    // println(x.apply(Test()))
 }
