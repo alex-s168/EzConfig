@@ -1,5 +1,6 @@
 package me.alex_s168.ezcfg
 
+import me.alex_s168.ktlib.async.AsyncTask
 import me.alex_s168.ktlib.async.concurrentMutableListOf
 import me.alex_s168.ktlib.tree.MutableNode
 
@@ -12,7 +13,8 @@ import me.alex_s168.ktlib.tree.MutableNode
  */
 internal fun parseStatement(
     inp: List<Token>,
-    errorContext: ErrorContext
+    errorContext: ErrorContext,
+    tasks: MutableCollection<AsyncTask>
 ): MutableNode<ASTValue> {
     val none = MutableNode<ASTValue>(
         null,
@@ -63,7 +65,7 @@ internal fun parseStatement(
             consume() ?: return none
 
             while (token.type != TokenType.PARENTHESES_CLOSE) {
-                val (used, expr) = parseExpression(inp, i, errorContext)
+                val (used, expr) = parseExpression(inp, i, errorContext, tasks)
                 i += used
                 if (i >= inp.size) {
                     errorContext.addError(token.location, "Missing closing parentheses!")
@@ -93,7 +95,7 @@ internal fun parseStatement(
             consume() ?: return none
 
             // ignores the amount of used tokens because it only uses as much as needed
-            val (_, right) = parseExpression(inp, i, errorContext)
+            val (_, right) = parseExpression(inp, i, errorContext, tasks)
 
             return MutableNode(
                 ASTAssignment(

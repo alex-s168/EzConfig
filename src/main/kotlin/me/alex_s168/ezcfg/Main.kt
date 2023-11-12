@@ -20,7 +20,7 @@ internal object ManualClassLoader {
 fun main() {
     ManualClassLoader.load()
 
-    val path = Path("run/categories.ezcfg")
+    val path = Path("run/test.ezcfg")
 
     val inp = path.toFile().readText()
 

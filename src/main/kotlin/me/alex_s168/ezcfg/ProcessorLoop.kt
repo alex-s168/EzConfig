@@ -1,14 +1,12 @@
 package me.alex_s168.ezcfg
 
 import me.alex_s168.ezcfg.exception.ConfigException
-import me.alex_s168.ktlib.async.AsyncTask
-import me.alex_s168.ktlib.async.async
-import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
-import me.alex_s168.ktlib.async.forEachAsyncConf
+import me.alex_s168.ktlib.async.*
 import me.alex_s168.ktlib.tree.MutableNode
 import me.alex_s168.ktlib.tree.MutableTree
 import me.alex_s168.ktlib.tree.Node
 import me.alex_s168.ktlib.tree.traverser.AsyncTreeTraverser
+import me.alex_s168.ktlib.tree.traverser.SimpleTreeTraverser
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
@@ -25,8 +23,8 @@ internal fun generateASTFor(
 
     val tokens = tokenize(input, rootLoc, tokenizingErrors)
 
-    val parsedNode =
-        parseMain(tokens, parserErrors)
+    val tasks = concurrentMutableCollectionOf<AsyncTask>()
+    val parsedNode = parseMain(tokens, parserErrors, tasks)
 
     val astFile = ASTFile(
         path = path.toAbsolutePath(),
@@ -38,14 +36,13 @@ internal fun generateASTFor(
             rootLocation = rootLoc
         )
     )
-
+    parsedNode.await()
+    tasks.await()
     val fileNode = MutableNode(
         value = astFile,
         children = parsedNode.children,
         parent = tree.root
     )
-
-    parsedNode.await()
 
     val allVariables = concurrentMutableCollectionOf<Iterable<Variable>>(astFile.variables)
 

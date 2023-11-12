@@ -75,6 +75,12 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: N
                 }
 
                 node.value!!.type = variable.type
+                if (node is MutableNode<*>) {
+                    node as MutableNode<ASTValue>
+                    node.value = variable.value.value
+                    node.children.clear()
+                    node.children += variable.value.children as Collection<MutableNode<ASTValue>>
+                }
             }
             is ASTAssignment -> {
                 traverser.process(node.children.last())

@@ -5,7 +5,8 @@ import me.alex_s168.ktlib.tree.MutableNode
 
 fun parseMain(
     inp: List<Token>,
-    errorContext: ErrorContext
+    errorContext: ErrorContext,
+    tasks: MutableCollection<AsyncTask>
 ): MutableNode<ASTValue> {
     var i = 0
     var token: Token
@@ -16,8 +17,6 @@ fun parseMain(
         token = inp[i]
         return inp[i - 1]
     }
-
-    val tasks = mutableListOf<AsyncTask>()
 
     val statements = concurrentMutableListOf<MutableNode<ASTValue>>()
     val lock = Any()
@@ -48,7 +47,7 @@ fun parseMain(
             parent = null
         )
         tasks += async {
-            val ret = parseStatement(tokens, errorContext)
+            val ret = parseStatement(tokens, errorContext, tasks)
             synchronized(lock) {
                 statements[where] = ret
             }
@@ -60,6 +59,6 @@ fun parseMain(
         value = null,
         children = statements,
         parent = null,
-        childrenFuture = tasks.createFuture { 0 }
+        childrenFuture = tasks.createFuture(0)
     )
 }

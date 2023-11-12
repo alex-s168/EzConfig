@@ -1,5 +1,6 @@
 package me.alex_s168.ezcfg
 
+import me.alex_s168.ktlib.async.AsyncTask
 import me.alex_s168.ktlib.async.concurrentMutableListOf
 import me.alex_s168.ktlib.async.forEachAsync
 import me.alex_s168.ktlib.tree.MutableNode
@@ -14,7 +15,8 @@ import me.alex_s168.ktlib.tree.MutableNode
 internal fun parseExpression(
     inp: List<Token>,
     off: Int,
-    errorContext: ErrorContext
+    errorContext: ErrorContext,
+    tasks: MutableCollection<AsyncTask>
 ): Pair<Int, MutableNode<ASTValue>> {
     // returns the number of tokens used and the expression and the ast node
     // handles expressions:
@@ -107,7 +109,7 @@ internal fun parseExpression(
             tokens += tk
 
             tokens.forEachAsync { tks ->
-                val (used, expr) = parseExpression(tks, 0, errorContext)
+                val (used, expr) = parseExpression(tks, 0, errorContext, tasks)
                 if (used != tks.size) {
                     errorContext.addError(tks[used].location, "Unexpected token!")
                 }
@@ -142,7 +144,7 @@ internal fun parseExpression(
                 else if (token.type == TokenType.CURLY_BRACE_CLOSE) ind--
                 tokens += token
             }
-            val m = parseMain(tokens.dropLast(1), errorContext)
+            val m = parseMain(tokens.dropLast(1), errorContext, tasks)
             return Pair(
                 i + 1 - off,
                 MutableNode(

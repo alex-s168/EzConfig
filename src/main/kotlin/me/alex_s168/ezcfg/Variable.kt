@@ -52,7 +52,6 @@ fun <T: ASTValue> Node<T>.resolve(name: List<String>, off: Int, master: Node<AST
         }
         return master.resolve(name, off + 1, master, ctx)
     }
-
     var parent = this.getParentBlock()
     while (parent != null) {
         parent.value!!.variables.forEach {
