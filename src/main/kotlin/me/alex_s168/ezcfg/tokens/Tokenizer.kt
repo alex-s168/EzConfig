@@ -40,6 +40,9 @@ enum class TokenType {
     COMMA,              // , (separates elements in an array literal)
     PARENTHESES_OPEN,   // ( (starts the arguments of a function call)
     PARENTHESES_CLOSE,  // ) (ends the arguments of a function call)
+    COLON,              // :
+
+    KEY_ENUM,           // enum (keyword)
 }
 
 fun tokenize(
@@ -52,6 +55,23 @@ fun tokenize(
     var line = 1
     var column = 1
     while (i < inp.length) {
+        val ac = inp.substring(i)
+        if (ac.startsWith("enum")) {
+            tokens += Token(
+                TokenType.KEY_ENUM,
+                "enum",
+                TokenLocation(
+                    line = line,
+                    column = column,
+                    length = 4,
+                    code = inp,
+                    rootLocation = root
+                )
+            )
+            i += 4
+            column += 4
+            continue
+        }
         val c = inp[i]
         when {
             c == '#' -> {
@@ -72,6 +92,21 @@ fun tokenize(
             c == '=' -> {
                 tokens += Token(
                     TokenType.EQUALS,
+                    c.toString(),
+                    TokenLocation(
+                        line = line,
+                        column = column,
+                        length = 1,
+                        code = inp,
+                        rootLocation = root
+                    )
+                )
+                i++
+                column++
+            }
+            c == ':' -> {
+                tokens += Token(
+                    TokenType.COLON,
                     c.toString(),
                     TokenLocation(
                         line = line,

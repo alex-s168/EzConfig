@@ -1,0 +1,15 @@
+include("std");
+
+ya = type.number;
+
+xe = enum {
+    a,
+    b,
+    c
+};
+
+ye = xe;
+
+x = xe.b;
+
+y = ye.a;

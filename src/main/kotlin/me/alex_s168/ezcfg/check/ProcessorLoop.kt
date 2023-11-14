@@ -24,7 +24,7 @@ internal fun generateASTFor(
     tokenizingErrors: ErrorContext,
     parserErrors: ErrorContext,
     processingErrors: ErrorContext
-): Iterable<AsyncTask> {
+): Running {
     val rootLoc = RootTokenLocation(path.toAbsolutePath().toString())
 
     val tokens = tokenize(input, rootLoc, tokenizingErrors)
@@ -43,7 +43,7 @@ internal fun generateASTFor(
         )
     )
     parsedNode.await()
-    tasks.await()
+    tasks.asRunning().await()
     val fileNode = MutableNode(
         value = astFile,
         children = parsedNode.children,
@@ -118,15 +118,6 @@ internal fun generateASTFor(
         }
         return@from true
     }.traverse()
-
-    fileNode.calculateTypes(processingErrors, fileNode)
-
-    // now we can update all the types of all the variables
-    allVariables.forEach {
-        it.forEach { v ->
-            v.type = v.value.value?.type
-        }
-    }
 
     tree += fileNode
 
@@ -207,14 +198,14 @@ internal fun generateASTFor(
                 root.imports.add(p)
 
                 importTasks += async {
-                    importTasks += generateASTFor(
+                    generateASTFor(
                         f.readText(),
                         p,
                         tree,
                         tokenizingErrors,
                         parserErrors,
                         processingErrors
-                    )
+                    ).await()
                 }
 
                 return@forEachAsyncConf
@@ -239,5 +230,14 @@ internal fun generateASTFor(
         }
     }
 
-    return importTasks
+    return importTasks.asRunning().then {
+        fileNode.calculateTypes(processingErrors, fileNode)
+
+        // now we can update all the types of all the variables
+        allVariables.forEach {
+            it.forEach { v ->
+                v.type = v.value.value?.type
+            }
+        }
+    }
 }

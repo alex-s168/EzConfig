@@ -1,0 +1,9 @@
+type = {
+    number = :0;
+    string = :"";
+    block = :{};
+    array = :[];
+    function = :function;
+    type = ::0;
+};
+export("type");

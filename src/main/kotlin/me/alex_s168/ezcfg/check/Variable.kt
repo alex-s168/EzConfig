@@ -3,6 +3,7 @@ package me.alex_s168.ezcfg.check
 import me.alex_s168.ezcfg.ErrorContext
 import me.alex_s168.ezcfg.addError
 import me.alex_s168.ezcfg.ast.ASTFile
+import me.alex_s168.ezcfg.ast.ASTRoot
 import me.alex_s168.ezcfg.ast.ASTValue
 import me.alex_s168.ezcfg.exception.ConfigException
 import me.alex_s168.ezcfg.getParentBlock
@@ -22,13 +23,20 @@ class Variable(
 }
 
 fun <T: ASTValue> Node<T>.resolve(name: String, master: Node<ASTFile>, ctx: ErrorContext): Variable? =
-    this.resolve(name.split('.'), 0, master, ctx)
+    this.resolve(name.split('.'), 0, master, ctx, false)
 
 // TODO: check for name collisions and warn
 @Suppress("UNCHECKED_CAST")
-fun <T: ASTValue> Node<T>.resolve(name: List<String>, off: Int, master: Node<ASTFile>, ctx: ErrorContext): Variable? {
+fun <T: ASTValue> Node<T>.resolve(
+    name: List<String>,
+    off: Int,
+    master: Node<ASTFile>,
+    ctx: ErrorContext,
+    onlyExported: Boolean
+): Variable? {
     val curr = name[off]
     val left = name.size - off - 1
+
     if (curr == "parent") {
         val p = this.getParentBlock()
         if (p == null) {
@@ -45,8 +53,9 @@ fun <T: ASTValue> Node<T>.resolve(name: List<String>, off: Int, master: Node<AST
                 p as Node<ASTValue>
             )
         }
-        return p.resolve(name, off + 1, master, ctx)
+        return p.resolve(name, off + 1, master, ctx, onlyExported)
     }
+
     if (curr == "top") {
         if (left == 0) {
             return Variable(
@@ -55,16 +64,17 @@ fun <T: ASTValue> Node<T>.resolve(name: List<String>, off: Int, master: Node<AST
                 master as Node<ASTValue>
             )
         }
-        return master.resolve(name, off + 1, master, ctx)
+        return master.resolve(name, off + 1, master, ctx, onlyExported)
     }
+
     var parent = this.getParentBlock()
     while (parent != null) {
         parent.value!!.variables.forEach {
-            if (it.name == curr) {
+            if (it.name == curr && (!onlyExported || it.exported)) {
                 if (left == 0) {
                     return it
                 }
-                return it.value.resolve(name, off + 1, master, ctx)
+                return it.value.resolve(name, off + 1, master, ctx, onlyExported)
             }
         }
         val new = parent.getParentBlock()
@@ -74,5 +84,22 @@ fun <T: ASTValue> Node<T>.resolve(name: List<String>, off: Int, master: Node<AST
         parent = new
     }
 
+    // search exported variables in other files
+    val root = ((master as Node<ASTValue>).parent!! as Node<ASTRoot>)
+
+    (root.children as Collection<Node<ASTFile>>).forEach { f ->
+        if (f == master) {
+            return@forEach
+        }
+
+        f.value!!.variables.forEach {
+            if (it.name == curr && it.exported) {
+                if (left == 0) {
+                    return it
+                }
+                return it.value.resolve(name, off + 1, master, ctx, onlyExported)
+            }
+        }
+    }
     return null
 }

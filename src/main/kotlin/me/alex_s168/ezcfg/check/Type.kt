@@ -3,6 +3,7 @@ package me.alex_s168.ezcfg.check
 import me.alex_s168.ezcfg.ErrorContext
 import me.alex_s168.ezcfg.addError
 import me.alex_s168.ezcfg.ast.*
+import me.alex_s168.ezcfg.exception.ConfigException
 import me.alex_s168.ktlib.async.forEachAsyncConf
 import me.alex_s168.ktlib.tree.MutableNode
 import me.alex_s168.ktlib.tree.Node
@@ -15,12 +16,17 @@ enum class TypeBase {
     FUNCTION,
     BLOCK,
 
-    FILE_MAIN
+    TYPE,
+
+    FILE_MAIN,
+
+    ENUM_MEMBER
 }
 
 // the idea is that every element in an array can be of a different type
 data class Type(
-    val type: TypeBase
+    val type: TypeBase,
+    val extra: Type? = null
 )
 
 fun Type.isCompatibleWith(other: Type): Boolean =
@@ -35,6 +41,27 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: N
             }
         }
         when (node.value) {
+            is ASTTypeOf -> {
+                traverser.process(node.children.first())
+                val type = node.children.first().value!!.type
+                    ?: throw ConfigException("TypeOf has no type!")
+                node.value!!.type = Type(
+                    TypeBase.TYPE,
+                    type
+                )
+                if (node is MutableNode<ASTValue>) {
+                    node.value = ASTTypeLit(
+                        type,
+                        node.value!!.loc
+                    )
+                    node.value!!.type = Type(
+                        TypeBase.TYPE,
+                        type
+                    )
+                    node.children.clear()
+                }
+                return@from false
+            }
             is ASTFile -> {
                 return@from true
             }
@@ -58,12 +85,12 @@ fun MutableNode<ASTValue>.calculateTypes(errorContext: ErrorContext, fileNode: N
             is ASTFunctionCall -> {
                 val fn = (node.children.first().value as ASTVariableReference).variable
 
-                if (fn !in listOf("function", "native", "export")) {
+                if (fn !in listOf("native", "export", "include")) {
                     val v = node.resolve(fn, fileNode as Node<ASTFile>, errorContext)
                     if (v == null) {
                         errorContext.addError(
                             loc = node.value!!.loc,
-                            msg = "Function (/Variable) $fn is not defined!"
+                            msg = "Function (/ variable) \"$fn\" is not defined!"
                         )
                         return@from false
                     }

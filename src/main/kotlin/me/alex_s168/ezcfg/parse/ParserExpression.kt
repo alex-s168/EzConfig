@@ -45,7 +45,84 @@ internal fun parseExpression(
         return inp[i - 1]
     }
 
+    fun expect(type: TokenType) {
+        i++
+        if (i >= inp.size) {
+            errorContext.addError(token.location, "Unexpected end of file!")
+            return
+        }
+        token = inp[i]
+        if (token.type != type) {
+            errorContext.addError(token.location, "Expected ${type.name}!")
+        }
+    }
+
     when (token.type) {
+        TokenType.KEY_ENUM -> {
+            expect(TokenType.CURLY_BRACE_OPEN)
+            consume()
+            val children = mutableListOf<String>()
+            while (token.type != TokenType.CURLY_BRACE_CLOSE) {
+                if (token.type == TokenType.COMMA) {
+                    val x = consume()
+                    if (x == null) {
+                        errorContext.addError(token.location, "Unexpected end of file!")
+                        return none
+                    }
+                } else {
+                    children += token.value
+                    if (token.type != TokenType.IDENTIFIER) {
+                        errorContext.addError(token.location, "Expected identifier!")
+                        return none
+                    }
+                    val t = consume()
+                    if (t == null) {
+                        errorContext.addError(token.location, "Unexpected end of file!")
+                        return none
+                    }
+                }
+            }
+            val v = ASTEnum(
+                children,
+                TokenLocation(
+                    token.location.line,
+                    token.location.column,
+                    token.location.column - token.location.column,
+                    token.location.code,
+                    token.location.rootLocation
+                )
+            )
+            return Pair(
+                i + 1 - off,
+                MutableNode(
+                    v,
+                    concurrentMutableListOf(),
+                    null
+                )
+            )
+        }
+        TokenType.COLON -> {
+            // typeof
+            parseExpression(inp, i + 1, errorContext, tasks).let { (used, expr) ->
+                val v = ASTTypeOf(
+                    TokenLocation(
+                        token.location.line,
+                        token.location.column,
+                        token.location.column - token.location.column,
+                        token.location.code,
+                        token.location.rootLocation
+                    )
+                )
+                return Pair(
+                    used + 1,
+                    MutableNode(
+                        v,
+                        concurrentMutableListOf(expr),
+                        null
+                    )
+                )
+            }
+        }
         TokenType.IDENTIFIER -> {
             return Pair(
                 1,
@@ -114,7 +191,7 @@ internal fun parseExpression(
             tokens.forEach { tks ->
                 xtsk.clear()
                 val (used, expr) = parseExpression(tks, 0, errorContext, xtsk)
-                xtsk.await()
+                xtsk.asRunning().await()
                 if (used != tks.size) {
                     errorContext.addError(tks[used].location, "Unexpected token!")
                 }

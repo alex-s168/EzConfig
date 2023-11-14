@@ -1,5 +1,3 @@
-package me.alex_s168.ezcfg
-
 import me.alex_s168.ezcfg.ast.ASTValue
 import me.alex_s168.ezcfg.check.generateAST
 import me.alex_s168.ezcfg.i.FileSource
@@ -26,24 +24,31 @@ class Test {
 }
  */
 
+/*
 class RegistryElement {
     var name: String = ""
 
     override fun toString(): String = "RegistryElement(name=\"$name\")"
 }
+*/
 
 fun main() {
-    execute(
-        listOf(
-            FileSource("run/test2.ezcfg")
-        ),
-        mapOf(
-            "register" to { arg ->
-                val r = arg!!.apply(RegistryElement())
-                println("registered: $r")
-            }
-        )
-    )
+    val path = Path("run/enums.ezcfg")
+    val inp = path.toFile().readText()
+    val ast = generateAST(inp, path)
+    println(ast)
+
+    // execute(
+    //     listOf(
+    //         FileSource("run/test2.ezcfg")
+    //     ),
+    //     mapOf(
+    //         "register" to { arg ->
+    //             val r = arg!!.apply(RegistryElement())
+    //             println("registered: $r")
+    //         }
+    //     )
+    // )
 
     // val path = Path("run/test2.ezcfg")
 //

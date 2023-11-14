@@ -16,7 +16,7 @@ dependencies {
 
     implementation(kotlin("reflect"))
 
-    implementation("com.github.SuperCraftAlex:ktlib:339f73db75")
+    implementation("com.github.SuperCraftAlex:ktlib:4a380bf749")
     implementation("com.github.ajalt.mordant:mordant:2.1.0")
 }
 

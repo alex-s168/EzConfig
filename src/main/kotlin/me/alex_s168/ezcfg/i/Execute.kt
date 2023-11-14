@@ -9,7 +9,6 @@ import me.alex_s168.ezcfg.done
 import me.alex_s168.ezcfg.exception.ConfigException
 import me.alex_s168.ezcfg.tokens.RootTokenLocation
 import me.alex_s168.ezcfg.tokens.TokenLocation
-import me.alex_s168.ktlib.async.await
 import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import me.alex_s168.ktlib.tree.MutableNode
 import me.alex_s168.ktlib.tree.MutableTree
