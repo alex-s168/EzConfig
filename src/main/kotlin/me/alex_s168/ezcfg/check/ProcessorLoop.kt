@@ -25,7 +25,10 @@ internal fun generateASTFor(
     parserErrors: ErrorContext,
     processingErrors: ErrorContext
 ): Running {
-    val rootLoc = RootTokenLocation(path.toAbsolutePath().toString())
+    val rootLoc = RootTokenLocation(
+        file = path.toAbsolutePath().toString(),
+        code = input
+    )
 
     val tokens = tokenize(input, rootLoc, tokenizingErrors)
 
@@ -38,8 +41,7 @@ internal fun generateASTFor(
             line = 0,
             column = 0,
             length = 0,
-            code = input,
-            rootLocation = rootLoc
+            root = rootLoc
         )
     )
     parsedNode.await()

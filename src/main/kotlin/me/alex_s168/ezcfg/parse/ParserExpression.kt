@@ -68,8 +68,7 @@ internal fun parseExpression(
                     currLoc.line,
                     currLoc.column,
                     currLoc.length + id.location.length,
-                    currLoc.code,
-                    currLoc.rootLocation
+                    currLoc.root
                 )
             )
             return 2 to MutableNode(
@@ -123,8 +122,7 @@ internal fun parseExpression(
                         token.location.line,
                         token.location.column,
                         token.location.column - token.location.column,
-                        token.location.code,
-                        token.location.rootLocation
+                        token.location.root
                     )
                 )
                 return Pair(
@@ -217,8 +215,7 @@ internal fun parseExpression(
                     token.location.line,
                     token.location.column,
                     token.location.column - token.location.column,
-                    token.location.code,
-                    token.location.rootLocation
+                    token.location.root
                 ),
                 children.toMutableList()
             )
@@ -250,8 +247,7 @@ internal fun parseExpression(
                             token.location.line,
                             token.location.column,
                             token.location.column - token.location.column,
-                            token.location.code,
-                            token.location.rootLocation
+                            token.location.root
                         )
                     ),
                     m.children,

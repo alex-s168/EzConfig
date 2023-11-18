@@ -30,9 +30,9 @@ fun execute(
             line = 0,
             column = 0,
             length = 0,
-            code = "",
-            rootLocation = RootTokenLocation(
-                file = "ROOT"
+            root = RootTokenLocation(
+                file = "ROOT",
+                code = ""
             )
         )
     )

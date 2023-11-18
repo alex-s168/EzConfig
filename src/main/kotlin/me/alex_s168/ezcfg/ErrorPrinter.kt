@@ -49,7 +49,7 @@ fun ErrorContext.done() {
     }
 
     val files = errors.groupBy {
-        it.loc.rootLocation.file
+        it.loc.root.file
     }
 
     if (files.isNotEmpty()) {
@@ -77,7 +77,7 @@ private fun printLoc(loc: TokenLocation, color: TextColors, msg: String?) {
     val leftUnc = "${loc.line} | "
     val left = TextColors.gray(leftUnc)
     print(left)
-    val line = loc.code.split("\n")[loc.line - 1]
+    val line = loc.root.code.split("\n")[loc.line - 1]
 
     val pre = line.substring(0, max(0, loc.column - loc.length))
     val mid = TextStyles.bold(line.substring(max(0, loc.column - loc.length), min(line.length, loc.column + loc.length - loc.length)))

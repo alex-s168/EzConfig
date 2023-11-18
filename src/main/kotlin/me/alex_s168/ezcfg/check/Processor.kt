@@ -22,9 +22,9 @@ fun generateAST(input: String, path: Path): MutableTree<ASTValue> {
             line = 0,
             column = 0,
             length = 0,
-            code = input,
-            rootLocation = RootTokenLocation(
-                file = "ROOT"
+            root = RootTokenLocation(
+                file = "ROOT",
+                code = input,
             )
         )
     )

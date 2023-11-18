@@ -33,7 +33,6 @@ fun <T: ASTValue> Node<T>.resolve(name: String, master: Node<ASTFile>, ctx: Erro
         null
     }
 
-// TODO: check for name collisions and warn
 @Suppress("UNCHECKED_CAST")
 fun <T: ASTValue> Node<T>.resolve(
     name: List<String>,

@@ -41,8 +41,7 @@ fun tokenize(
                         line = line,
                         column = column,
                         length = it.key.length,
-                        code = inp,
-                        rootLocation = root
+                        root = root
                     )
                 )
                 i += it.key.length
@@ -86,8 +85,7 @@ fun tokenize(
                         line = line,
                         column = column,
                         length = end - start + 1,
-                        code = inp,
-                        rootLocation = root
+                        root = root
                     )
                 )
                 i++
@@ -109,8 +107,7 @@ fun tokenize(
                         line = line,
                         column = column,
                         length = end - start + 1,
-                        code = inp,
-                        rootLocation = root
+                        root = root
                     )
                 )
             }
@@ -130,8 +127,7 @@ fun tokenize(
                         line = line,
                         column = column,
                         length = end - start + 1,
-                        code = inp,
-                        rootLocation = root
+                        root = root
                     )
                 )
             }
@@ -141,8 +137,7 @@ fun tokenize(
                         line = line,
                         column = column,
                         length = 1,
-                        code = inp,
-                        rootLocation = root
+                        root = root
                     ),
                     "Unexpected character '$c'"
                 )

@@ -91,8 +91,7 @@ internal fun parseStatement(
                         left.location.line,
                         left.location.column,
                         token.location.column - left.location.column,
-                        left.location.code,
-                        left.location.rootLocation
+                        left.location.root
                     )
                 ),
                 children,
@@ -111,8 +110,7 @@ internal fun parseStatement(
                         left.location.line,
                         left.location.column,
                         (right.value?.loc?.column ?: left.location.column) - left.location.column,
-                        left.location.code,
-                        left.location.rootLocation
+                        left.location.root
                     )
                 ),
                 concurrentMutableListOf(

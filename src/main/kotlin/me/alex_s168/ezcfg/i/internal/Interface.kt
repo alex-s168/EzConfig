@@ -149,10 +149,7 @@ fun <T> Node<ASTBlock>.apply(obj: T, errCtx: ErrorContext): T {
                 (valueO as Node<ASTBlock>).apply(o, errCtx)
                 f.set(obj, o)
             }
-        } catch (x: Exception) {
-            // TODO: rem
-            println("debug: $x")
-        }
+        } catch (x: Exception) {}
     }
     return obj
 }

@@ -1,7 +1,8 @@
 package me.alex_s168.ezcfg.tokens
 
 data class RootTokenLocation(
-    val file: String
+    val file: String,
+    val code: String
 )
 
 // TODO: refactor: move val code into RootTokenLocation
@@ -9,8 +10,7 @@ data class TokenLocation(
     val line: Int,
     val column: Int,
     val length: Int,
-    val code: String,
-    val rootLocation: RootTokenLocation
+    val root: RootTokenLocation
 )
 
 data class Token(
