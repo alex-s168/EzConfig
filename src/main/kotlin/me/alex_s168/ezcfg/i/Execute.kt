@@ -48,6 +48,7 @@ fun execute(
     val tokenizingErrors = ErrorContext("tokenizing")
     val parserErrors = ErrorContext("parsing")
     val processingErrors = ErrorContext("processing")
+    val executionErrors = ErrorContext("execution")
 
     var hadException = false
 
@@ -127,7 +128,7 @@ fun execute(
             val f = it.value
             if (f is ASTFunctionCall) {
                 var x: Node<ASTVariableReference> = it.children.first() as Node<ASTVariableReference>
-                if (x.value!!.variable in listOf("function", "native", "export")) {
+                if (x.value!!.variable in listOf("function", "native", "export", "include")) {
                     return@forEach
                 }
                 var name: String = x.value!!.variable
@@ -140,9 +141,11 @@ fun execute(
                             as? Node<ASTVariableReference>
                         ?: throw ConfigException("Unexpected error occurred! [gAST:r:1]")
                 }
-                functions[name]?.invoke(it.children.toList().getOrNull(1))
+                functions[name]?.invoke(it.children.toList().getOrNull(1), executionErrors)
                     ?: throw ConfigException("Unexpected error occurred! [gAST:r:2]")
             }
         }
     }
+
+    executionErrors.done()
 }

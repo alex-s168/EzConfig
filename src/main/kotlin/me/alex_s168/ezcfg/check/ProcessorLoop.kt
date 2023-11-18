@@ -139,7 +139,11 @@ internal fun generateASTFor(
                 "include" -> { 0 }
                 "export" -> { 1 }
                 "native" -> { 2 }
-                else -> { return@forEachAsyncConf }
+                else -> {
+                    // type check argument
+                    arg.calculateTypes(processingErrors, fileNode)
+                    return@forEachAsyncConf
+                }
             }
 
             if (arg == func) {

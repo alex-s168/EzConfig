@@ -32,11 +32,33 @@ class RegistryElement {
 }
 */
 
+enum class TestEnum {
+    a, b, c
+}
+
+class Data {
+    lateinit var v: TestEnum
+
+    override fun toString(): String = "Data(v=$v)"
+}
+
 fun main() {
-    val path = Path("run/enums.ezcfg")
-    val inp = path.toFile().readText()
-    val ast = generateAST(inp, path)
-    println(ast)
+    execute(
+        listOf(
+            FileSource("run/enums.ezcfg")
+        ),
+        mapOf(
+            "register" to { arg, ctx ->
+                val r = arg!!.apply(Data(), ctx)
+                println("registered: $r")
+            }
+        )
+    )
+
+    // val path = Path("run/enums.ezcfg")
+    // val inp = path.toFile().readText()
+    // val ast = generateAST(inp, path)
+    // println(ast)
 
     // execute(
     //     listOf(

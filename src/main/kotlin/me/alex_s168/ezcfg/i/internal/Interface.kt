@@ -1,14 +1,36 @@
-package me.alex_s168.ezcfg
+package me.alex_s168.ezcfg.i.internal
 
+import me.alex_s168.ezcfg.ErrorContext
+import me.alex_s168.ezcfg.addError
 import me.alex_s168.ezcfg.ast.*
-import me.alex_s168.ezcfg.check.TypeBase
 import me.alex_s168.ezcfg.exception.ConfigException
 import me.alex_s168.ktlib.tree.Node
-import java.lang.Exception
 import java.lang.reflect.Constructor
+import kotlin.Exception
 
 @Suppress("UNCHECKED_CAST")
-internal fun <T> conv(clazz: Class<T>, value: Node<ASTValue>): T? {
+internal fun <T> conv(clazz: Class<T>, value: Node<ASTValue>, errCtx: ErrorContext): T? {
+    if (clazz.isEnum) {
+        val enum = clazz as Class<out Enum<*>>
+        enum.enumConstants
+        if (value.value !is ASTEnumValue) {
+            throw ConfigException("Expected enum, got ${value.value!!.type!!.type}")
+        }
+        val v = value.value!! as ASTEnumValue
+        try {
+            return java.lang.Enum.valueOf(enum, v.value) as T
+        } catch (e: Exception) {
+            val en = v.enum
+
+            errCtx.addError(
+                en.loc,
+                "Enum contains value(s) that are not in ${enum.canonicalName}! (\"${v.value}\")"
+            )
+            
+            return null
+        }
+    }
+
     if (clazz.isArray) {
         if (value.value !is ASTArray) {
             throw ConfigException("Expected array, got ${value.value!!.type!!.type}")
@@ -16,7 +38,7 @@ internal fun <T> conv(clazz: Class<T>, value: Node<ASTValue>): T? {
         val iarr = (value.value!! as ASTArray).content
         val arr = java.lang.reflect.Array.newInstance(clazz.componentType, iarr.size)
         iarr.forEachIndexed { i, it ->
-            val x = conv(clazz.componentType, it)
+            val x = conv(clazz.componentType, it, errCtx)
             java.lang.reflect.Array.set(arr, i, x)
         }
         return arr as T
@@ -99,15 +121,15 @@ internal fun <T> conv(clazz: Class<T>, value: Node<ASTValue>): T? {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Node<ASTBlock>.apply(obj: T): T {
+fun <T> Node<ASTBlock>.apply(obj: T, errCtx: ErrorContext): T {
     val clazz = obj!!::class.java
     this.value!!.variables.forEach { variable ->
         val valueO = variable.value
-        //try {
+        try {
             val f = clazz.getDeclaredField(variable.name)
             f.isAccessible = true
 
-            val v = conv(f.type, valueO)
+            val v = conv(f.type, valueO, errCtx)
             if (v != null) {
                 f.set(obj, v)
             }
@@ -124,10 +146,13 @@ fun <T> Node<ASTBlock>.apply(obj: T): T {
                 }
                 c.isAccessible = true
                 val o = c.newInstance()
-                (valueO as Node<ASTBlock>).apply(o)
+                (valueO as Node<ASTBlock>).apply(o, errCtx)
                 f.set(obj, o)
             }
-        //} catch (_: Exception) {}
+        } catch (x: Exception) {
+            // TODO: rem
+            println("debug: $x")
+        }
     }
     return obj
 }

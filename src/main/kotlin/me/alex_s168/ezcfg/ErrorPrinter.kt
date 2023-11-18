@@ -90,7 +90,7 @@ private fun printLoc(loc: TokenLocation, color: TextColors, msg: String?) {
 
     val ll = leftUnc.length + pre.length
     print(" ".repeat(ll))
-    print(color("^" + "~".repeat(loc.length - 1)))
+    print(color("^" + "~".repeat(max(0, loc.length - 1))))
     println()
 
     msg?.let {

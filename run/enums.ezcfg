@@ -13,3 +13,11 @@ ye = xe;
 x = xe.b;
 
 y = ye.a;
+
+data = {
+    v = y;
+};
+register = function;
+export(&register);
+native(&register);
+register(data);

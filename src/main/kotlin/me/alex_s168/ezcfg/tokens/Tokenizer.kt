@@ -3,47 +3,21 @@ package me.alex_s168.ezcfg.tokens
 import me.alex_s168.ezcfg.ErrorContext
 import me.alex_s168.ezcfg.addError
 
-data class RootTokenLocation(
-    val file: String
+private val simpleTokens = mapOf(
+    "enum" to TokenType.KEY_ENUM,
+
+    "=" to TokenType.EQUALS,
+    ";" to TokenType.SEMICOLON,
+    "{" to TokenType.CURLY_BRACE_OPEN,
+    "}" to TokenType.CURLY_BRACE_CLOSE,
+    "[" to TokenType.SQUARE_BRACE_OPEN,
+    "]" to TokenType.SQUARE_BRACE_CLOSE,
+    "," to TokenType.COMMA,
+    "(" to TokenType.PARENTHESES_OPEN,
+    ")" to TokenType.PARENTHESES_CLOSE,
+    ":" to TokenType.COLON,
+    "&" to TokenType.AND
 )
-
-// TODO: refactor: move val code into RootTokenLocation
-data class TokenLocation(
-    val line: Int,
-    val column: Int,
-    val length: Int,
-    val code: String,
-    val rootLocation: RootTokenLocation
-)
-
-data class Token(
-    val type: TokenType,
-    val value: String,
-    val location: TokenLocation
-) {
-
-    override fun toString(): String =
-        "Token(type=$type, value=\"$value\")"
-
-}
-
-enum class TokenType {
-    IDENTIFIER,         // (start with letter, can contain letters, numbers, underscores, and dots)
-    EQUALS,             // = (assignment)
-    SEMICOLON,          // ; (statement terminator)
-    STRING,             // "string" (double-quoted string literal)
-    NUMBER,             // 123.456 (number literal (double))
-    CURLY_BRACE_OPEN,   // { (starts a block of statements)
-    CURLY_BRACE_CLOSE,  // } (ends a block of statements)
-    SQUARE_BRACE_OPEN,  // [ (starts an array literal)
-    SQUARE_BRACE_CLOSE, // ] (ends an array literal)
-    COMMA,              // , (separates elements in an array literal)
-    PARENTHESES_OPEN,   // ( (starts the arguments of a function call)
-    PARENTHESES_CLOSE,  // ) (ends the arguments of a function call)
-    COLON,              // :
-
-    KEY_ENUM,           // enum (keyword)
-}
 
 fun tokenize(
     inp: String,
@@ -56,22 +30,29 @@ fun tokenize(
     var column = 1
     while (i < inp.length) {
         val ac = inp.substring(i)
-        if (ac.startsWith("enum")) {
-            tokens += Token(
-                TokenType.KEY_ENUM,
-                "enum",
-                TokenLocation(
-                    line = line,
-                    column = column,
-                    length = 4,
-                    code = inp,
-                    rootLocation = root
+
+        var found = false
+        for (it in simpleTokens) {
+            if  (ac.startsWith(it.key)) {
+                tokens += Token(
+                    it.value,
+                    it.key,
+                    TokenLocation(
+                        line = line,
+                        column = column,
+                        length = it.key.length,
+                        code = inp,
+                        rootLocation = root
+                    )
                 )
-            )
-            i += 4
-            column += 4
-            continue
+                i += it.key.length
+                column += it.key.length
+                found = true
+                break
+            }
         }
+        if (found) continue
+
         val c = inp[i]
         when {
             c == '#' -> {
@@ -86,156 +67,6 @@ fun tokenize(
                 i++
             }
             c.isWhitespace() -> {
-                i++
-                column++
-            }
-            c == '=' -> {
-                tokens += Token(
-                    TokenType.EQUALS,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == ':' -> {
-                tokens += Token(
-                    TokenType.COLON,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == ';' -> {
-                tokens += Token(
-                    TokenType.SEMICOLON,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == '{' -> {
-                tokens += Token(
-                    TokenType.CURLY_BRACE_OPEN,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == '}' -> {
-                tokens += Token(
-                    TokenType.CURLY_BRACE_CLOSE,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == '[' -> {
-                tokens += Token(
-                    TokenType.SQUARE_BRACE_OPEN,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == ']' -> {
-                tokens += Token(
-                    TokenType.SQUARE_BRACE_CLOSE,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == ',' -> {
-                tokens += Token(
-                    TokenType.COMMA,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == '(' -> {
-                tokens += Token(
-                    TokenType.PARENTHESES_OPEN,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
-                i++
-                column++
-            }
-            c == ')' -> {
-                tokens += Token(
-                    TokenType.PARENTHESES_CLOSE,
-                    c.toString(),
-                    TokenLocation(
-                        line = line,
-                        column = column,
-                        length = 1,
-                        code = inp,
-                        rootLocation = root
-                    )
-                )
                 i++
                 column++
             }

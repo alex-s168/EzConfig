@@ -23,7 +23,15 @@ class Variable(
 }
 
 fun <T: ASTValue> Node<T>.resolve(name: String, master: Node<ASTFile>, ctx: ErrorContext): Variable? =
-    this.resolve(name.split('.'), 0, master, ctx, false)
+    try {
+        this.resolve(name.split('.'), 0, master, ctx, false)
+    } catch (e: StackOverflowError) {
+        ctx.addError(
+            this.value!!.loc,
+            "THIS SHOULD NOT HAPPEN! Stack overflow while resolving variable!"
+        )
+        null
+    }
 
 // TODO: check for name collisions and warn
 @Suppress("UNCHECKED_CAST")
@@ -101,5 +109,6 @@ fun <T: ASTValue> Node<T>.resolve(
             }
         }
     }
-    return null
+
+    return master.resolve(name, off, master, ctx, onlyExported)
 }

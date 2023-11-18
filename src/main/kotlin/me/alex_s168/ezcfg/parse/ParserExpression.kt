@@ -58,9 +58,29 @@ internal fun parseExpression(
     }
 
     when (token.type) {
+        TokenType.AND -> {
+            val currLoc = token.location
+            expect(TokenType.IDENTIFIER)
+            val id = consume()!!
+            val v = ASTString(
+                id.value,
+                TokenLocation(
+                    currLoc.line,
+                    currLoc.column,
+                    currLoc.length + id.location.length,
+                    currLoc.code,
+                    currLoc.rootLocation
+                )
+            )
+            return 2 to MutableNode(
+                v,
+                concurrentMutableListOf(),
+                null
+            )
+        }
         TokenType.KEY_ENUM -> {
             expect(TokenType.CURLY_BRACE_OPEN)
-            consume()
+            val startLoc = consume()?.location
             val children = mutableListOf<String>()
             while (token.type != TokenType.CURLY_BRACE_CLOSE) {
                 if (token.type == TokenType.COMMA) {
@@ -84,13 +104,7 @@ internal fun parseExpression(
             }
             val v = ASTEnum(
                 children,
-                TokenLocation(
-                    token.location.line,
-                    token.location.column,
-                    token.location.column - token.location.column,
-                    token.location.code,
-                    token.location.rootLocation
-                )
+                startLoc ?: token.location
             )
             return Pair(
                 i + 1 - off,
