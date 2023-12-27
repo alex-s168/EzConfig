@@ -1,0 +1,8 @@
+myFun = function;
+export(&myFun);
+native(&myFun);
+
+myVec = [1.2, 9.0, 3.2];
+myFun({
+    vec = myVec;
+});

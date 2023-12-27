@@ -3,6 +3,8 @@ package me.alex_s168.ezcfg
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextStyles
 import me.alex_s168.ezcfg.exception.ConfigException
+import me.alex_s168.ezcfg.i.Element
+import me.alex_s168.ezcfg.tokens.RootTokenLocation
 import me.alex_s168.ezcfg.tokens.TokenLocation
 import me.alex_s168.ktlib.async.concurrentMutableCollectionOf
 import kotlin.math.max
@@ -27,8 +29,16 @@ fun ErrorContext.addError(loc: TokenLocation, msg: String?) {
     errors += Error(loc, msg, false)
 }
 
+fun ErrorContext.addError(element: Element, msg: String?) {
+    errors += Error(element.value?.loc ?: TokenLocation(0, 0, 0, RootTokenLocation("unknown", "")), msg, false)
+}
+
 fun ErrorContext.addWarn(loc: TokenLocation, msg: String?) {
     errors += Error(loc, msg, true)
+}
+
+fun ErrorContext.addWarn(element: Element, msg: String?) {
+    errors += Error(element.value?.loc ?: TokenLocation(0, 0, 0, RootTokenLocation("unknown", "")), msg, true)
 }
 
 fun ErrorContext.done() {

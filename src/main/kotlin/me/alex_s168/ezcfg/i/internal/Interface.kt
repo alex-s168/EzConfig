@@ -4,12 +4,35 @@ import me.alex_s168.ezcfg.ErrorContext
 import me.alex_s168.ezcfg.addError
 import me.alex_s168.ezcfg.ast.*
 import me.alex_s168.ezcfg.exception.ConfigException
+import me.alex_s168.ezcfg.i.SerializationRules
+import me.alex_s168.ezcfg.i.SpecialSerializable
 import me.alex_s168.ktlib.tree.Node
 import java.lang.reflect.Constructor
 import kotlin.Exception
+import kotlin.reflect.full.createInstance
 
 @Suppress("UNCHECKED_CAST")
 internal fun <T> conv(clazz: Class<T>, value: Node<ASTValue>, errCtx: ErrorContext): T? {
+    val deserializeMethod = try {
+        clazz.getMethod("deserialize", Node::class.java, ErrorContext::class.java)
+    } catch (e: Exception) {
+        null
+    }
+    if (deserializeMethod != null) {
+        val s: T
+        try {
+            s = clazz.getConstructor().newInstance()
+        } catch (e: Exception) {
+            throw ConfigException("Expected default constructor for ${clazz.canonicalName}!")
+        }
+        try {
+            deserializeMethod.invoke(s, value, errCtx)
+        } catch (e: Exception) {
+            println(e)
+        }
+        return s
+    }
+
     if (clazz.isEnum) {
         val enum = clazz as Class<out Enum<*>>
         enum.enumConstants
@@ -121,13 +144,31 @@ internal fun <T> conv(clazz: Class<T>, value: Node<ASTValue>, errCtx: ErrorConte
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Node<ASTBlock>.apply(obj: T, errCtx: ErrorContext): T {
+fun <T> Node<ASTValue>.apply(obj: T, errCtx: ErrorContext): T {
     val clazz = obj!!::class.java
+    if (clazz.isInstance(SpecialSerializable::class)) {
+        val s = obj as SpecialSerializable<T>
+        s.deserialize(this, errCtx)
+        return obj
+    }
+    if (this.value !is ASTBlock) {
+        return conv(clazz, this, errCtx)!!
+    }
+    this as Node<ASTBlock>
     this.value!!.variables.forEach { variable ->
         val valueO = variable.value
         try {
             val f = clazz.getDeclaredField(variable.name)
             f.isAccessible = true
+            val serializationRules = try { f.getAnnotation(SerializationRules::class.java) } catch (_: Exception) { null }
+            if (serializationRules != null) {
+                f.set(obj, try {
+                    serializationRules.function.createInstance()
+                } catch (_: Exception) {
+                    throw ConfigException("Expected default constructor for SerializationFunction instantiating classes!")
+                }.deserialize(valueO, errCtx))
+                return@forEach
+            }
 
             val v = conv(f.type, valueO, errCtx)
             if (v != null) {
@@ -146,7 +187,7 @@ fun <T> Node<ASTBlock>.apply(obj: T, errCtx: ErrorContext): T {
                 }
                 c.isAccessible = true
                 val o = c.newInstance()
-                (valueO as Node<ASTBlock>).apply(o, errCtx)
+                valueO.apply(o, errCtx)
                 f.set(obj, o)
             }
         } catch (x: Exception) {}
